@@ -95,6 +95,10 @@
     });
 
     current = name;
+    section = null;
+    setContext(name === 'login' ? LOGIN_COPY : APPLY_COPY);
+    setSteps(name === 'login' ? null : 'apply');
+    if (name === 'apply') setStatus('Not signed in', '');
 
     if (!mounted[name]) {
       mounted[name] = true;
@@ -119,6 +123,220 @@
     show(next);
     document.getElementById(VIEWS[next].tab).focus();
   });
+
+  /* ── Context rail ───────────────────────────────────────────────────
+     The dashboard posts its state to this window (the same messages the
+     loader's own bridge consumes — listeners are additive, so reading them
+     here changes nothing). The application widget posts nothing at all, so
+     that tab gets static copy rather than a fake live readout. */
+
+  var SL_ORIGIN = 'https://socialladder.rkiapps.com';
+
+  var SECTIONS = {
+    'dashboard': ['Dashboard', 'Beans land here the moment a referral is credited.'],
+    'conversion-tracking': ['Refer a friend', 'Your link works anywhere — in store, in a DM, on a bag.'],
+    'challenges': ['Challenges', 'Each one pays in beans. New challenges drop with the Tuesday roast.'],
+    'rewards': ['Rewards', 'Trade beans for bags, gear, or a seat at the next cupping.'],
+    'community': ['Community', 'See who else is pouring. The leaderboard resets monthly.'],
+    'chat': ['Chat', 'Talk to the roaster. We answer between pours.'],
+    'threads': ['Threads', 'Longer conversations with the rest of the bar.'],
+    'notifications': ['Notifications', 'Challenge results, reward approvals and replies.'],
+    'settings': ['Settings', 'Payout details, socials and how we reach you.']
+  };
+
+  /* Onboarding shown alongside the sections that need explaining. */
+  var STEPS = {
+    'apply': [
+      'Contact details and how we reach you.',
+      'A few questions about how you drink coffee.',
+      'Agree to terms and submit.'
+    ],
+    'challenges': [
+      'Open a challenge to read the brief and what it pays.',
+      'Do the thing — post, refer a friend, or answer the quiz.',
+      'Submit. Beans land once we verify, usually within a day.'
+    ],
+    'conversion-tracking': [
+      'Copy your personal link.',
+      'Share it anywhere — in store, in a DM, on a bag.',
+      'Every order that starts with your link credits you.'
+    ],
+    'rewards': [
+      'Check your bean balance at the top.',
+      'Pick a reward and confirm.',
+      'Collect at the bar, or we ship it on the next roast day.'
+    ]
+  };
+
+  var APPLY_COPY = ['Applying', 'Join the bar',
+    'A short form, then we review. Approval lands by email, usually the same week.'];
+
+  var LOGIN_COPY = ['Signing in', 'Your bar',
+    'Sign in to pick up your challenges, beans and standing. This panel follows ' +
+    'along as you move through the portal.'];
+
+  var rail = {
+    statusText: document.getElementById('railStatusText'),
+    status: document.getElementById('railStatus'),
+    label: document.getElementById('railContextLabel'),
+    title: document.getElementById('railTitle'),
+    body: document.getElementById('railBody'),
+    countsBlock: document.getElementById('railCountsBlock'),
+    counts: document.getElementById('railCounts'),
+    stepsBlock: document.getElementById('railStepsBlock'),
+    steps: document.getElementById('railSteps'),
+    feed: document.getElementById('railFeed')
+  };
+
+  var counts = {};
+  var section = null;
+
+  function setStatus(text, state) {
+    if (!rail.statusText) return;
+    rail.statusText.textContent = text;
+    rail.status.dataset.state = state || '';
+  }
+
+  function setContext(copy) {
+    if (!rail.title) return;
+    rail.label.textContent = copy[0];
+    rail.title.textContent = copy[1];
+    rail.body.textContent = copy[2];
+  }
+
+  function note(text) {
+    if (!rail.feed) return;
+    var empty = rail.feed.querySelector('.rail-empty');
+    if (empty) empty.remove();
+
+    var time = new Date().toTimeString().slice(0, 8);
+    var li = document.createElement('li');
+    li.innerHTML = '<span>' + time + '</span>';
+    li.appendChild(document.createTextNode(text));
+    rail.feed.prepend(li);
+
+    while (rail.feed.children.length > 6) rail.feed.lastElementChild.remove();
+  }
+
+  function renderCounts() {
+    var keys = Object.keys(counts).filter(function (k) { return counts[k] > 0; });
+    rail.countsBlock.hidden = keys.length === 0;
+    rail.counts.innerHTML = '';
+    keys.forEach(function (k) {
+      var li = document.createElement('li');
+      li.textContent = k;
+      var b = document.createElement('b');
+      b.textContent = counts[k];
+      li.appendChild(b);
+      rail.counts.appendChild(li);
+    });
+  }
+
+  function setSteps(key) {
+    var steps = STEPS[key];
+    rail.stepsBlock.hidden = !steps;
+    if (!steps) return;
+    rail.steps.innerHTML = '';
+    steps.forEach(function (text) {
+      var li = document.createElement('li');
+      li.appendChild(document.createTextNode(text));
+      rail.steps.appendChild(li);
+    });
+  }
+
+  /* 'community/classic' and 'chat#thread-3' both resolve to their base view. */
+  function sectionOf(routerLink) {
+    return String(routerLink).split('#')[0].split('/')[0];
+  }
+
+  /* The portal's own title is a breadcrumb joined by ' - ', ' : ' and friends;
+     the last leaf is the specific thing being viewed (a challenge name, say). */
+  function leafOf(title) {
+    var parts = String(title).split(/\s[-—:;.|_]\s/);
+    var leaf = parts[parts.length - 1].trim();
+    return leaf.length > 1 && leaf.length < 60 ? leaf : '';
+  }
+
+  function onSection(routerLink, pageTitle) {
+    var key = sectionOf(routerLink);
+    var known = SECTIONS[key];
+    var fragment = String(routerLink).split('#')[1];
+    var moved = key !== section;
+
+    section = key;
+    if (fragment) note('Item: ' + fragment);
+
+    /* Drilling into an item fires this too, with the section unchanged — don't
+       overwrite a specific challenge/reward name with its section heading. */
+    if (!moved && fragment) return;
+
+    setSteps(key);
+    setContext(known
+      ? ['Viewing', known[0], known[1]]
+      : ['Viewing', pageTitle || key, 'Moving through the portal.']);
+    if (moved) note((known ? known[0] : key) + ' opened');
+  }
+
+  /* A title change without a section change means they drilled into an item —
+     a specific challenge, reward or thread. Name it if the portal named it. */
+  function onTitle(title) {
+    var leaf = leafOf(title);
+    if (!leaf) return;
+
+    note('Title: ' + leaf);
+
+    var known = SECTIONS[section];
+    if (!known || leaf.toLowerCase() === known[0].toLowerCase()) return;
+
+    var singular = { challenges: 'Challenge', rewards: 'Reward', threads: 'Thread' };
+    setContext([singular[section] || known[0], leaf, known[1]]);
+  }
+
+  window.addEventListener('message', function (event) {
+    if (event.origin !== SL_ORIGIN) return;
+
+    var msg = event.data;
+    if (!msg || typeof msg.action !== 'string') return;
+
+    switch (msg.action) {
+      case 'communityAuthenticated':
+        setStatus('Signed in', 'on');
+        note('Signed in');
+        break;
+      case 'communityAuthRequired':
+        setStatus('Sign-in required', 'warn');
+        note('Sign-in required');
+        break;
+      case 'loaded':
+        if (current === 'login') setStatus('Portal ready', 'on');
+        note('Portal loaded');
+        break;
+      case 'activeRouterLink':
+        if (typeof msg.routerLink === 'string') onSection(msg.routerLink);
+        break;
+      case 'updateBrowserHistory':
+        if (typeof msg.routerLink === 'string') onSection(msg.routerLink, msg.pageTitle);
+        break;
+      case 'updatePageTitle':
+        if (typeof msg.title === 'string') onTitle(msg.title);
+        break;
+      case 'newNotifications':
+        counts['Notifications'] = msg.count; renderCounts();
+        break;
+      case 'newChatNotifications':
+        counts['Chat'] = msg.count; renderCounts();
+        break;
+      case 'newCommunityNotifications':
+        counts['Community'] = msg.count; renderCounts();
+        break;
+      case 'testMode':
+        setStatus('Test mode', 'warn');
+        break;
+      case 'dialogOpened':
+        note('Dialog opened');
+        break;
+    }
+  }, false);
 
   /* A reset link, an explicit ?view=login, or a saved session opens sign-in. */
   var requested = (getParameterFromURLByName('view') || '').toLowerCase();

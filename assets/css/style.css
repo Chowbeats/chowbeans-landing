@@ -267,14 +267,111 @@ a { color: inherit; text-decoration: none; }
 }
 .page-hero p { margin-top: 1.25rem; max-width: 46ch; color: var(--ink-soft); }
 
-/* Tabs and widget centre as one column, independent of the left-aligned copy. */
-.widget {
+.widget { padding-bottom: clamp(4rem, 10vh, 6rem); }
+
+.widget-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 15rem;
+  gap: clamp(2rem, 4vw, 3.5rem);
+  align-items: start;
+}
+
+/* Tabs centre over the widget, independent of the left-aligned copy. */
+.widget-main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-bottom: clamp(4rem, 10vh, 6rem);
+  min-width: 0;
 }
-.widget .panel { width: 100%; }
+.widget-main .panel { width: 100%; }
+
+/* ── Context rail ─────────────────────────────────────── */
+
+.rail {
+  position: sticky;
+  top: 5rem;
+  display: grid;
+  gap: 1.25rem;
+}
+.rail-block { padding-top: .9rem; border-top: 1px solid var(--line); }
+.rail-block .label { margin-bottom: .55rem; }
+.rail h3 {
+  font-size: .95rem;
+  font-weight: 500;
+  margin-bottom: .3rem;
+}
+.rail p { font-size: .84rem; line-height: 1.55; color: var(--ink-soft); }
+
+.rail-status {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .84rem;
+  color: var(--ink) !important;
+}
+.rail-dot {
+  width: .45rem;
+  height: .45rem;
+  border-radius: 50%;
+  background: var(--ink-faint);
+  transition: background .3s var(--ease);
+}
+.rail-status[data-state='on'] .rail-dot { background: var(--bean); }
+.rail-status[data-state='warn'] .rail-dot { background: #C0703A; }
+
+.rail-steps {
+  counter-reset: step;
+  display: grid;
+  gap: .5rem;
+}
+.rail-steps li {
+  counter-increment: step;
+  display: grid;
+  grid-template-columns: 1.1rem 1fr;
+  gap: .5rem;
+  font-size: .82rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+.rail-steps li::before {
+  content: counter(step);
+  color: var(--bean);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.rail-links { display: grid; gap: .3rem; }
+.rail-links a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: .4rem;
+  font-size: .82rem;
+  color: var(--ink-soft);
+  transition: color .25s var(--ease);
+}
+.rail-links a::after {
+  content: '→';
+  color: var(--ink-faint);
+  transition: transform .25s var(--ease), color .25s var(--ease);
+}
+.rail-links a:hover { color: var(--bean); }
+.rail-links a:hover::after { color: var(--bean); transform: translateX(.15rem); }
+
+.rail-counts li,
+.rail-feed li {
+  display: flex;
+  gap: .5rem;
+  padding-block: .25rem;
+  font-size: .8rem;
+  color: var(--ink-soft);
+}
+.rail-counts li { justify-content: space-between; }
+.rail-counts b { font-weight: 500; color: var(--ink); }
+.rail-feed span {
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+.rail-empty { color: var(--ink-faint); }
 
 /* Segmented control — the selected side is a filled pill, not a hairline. */
 .tabs {
@@ -358,6 +455,11 @@ a { color: inherit; text-decoration: none; }
 .reveal-ready [data-reveal].is-in { opacity: 1; transform: none; }
 
 /* ── Responsive ───────────────────────────────────────── */
+
+@media (max-width: 1040px) {
+  .widget-layout { grid-template-columns: 1fr; }
+  .rail { position: static; margin-top: 1rem; }
+}
 
 @media (max-width: 720px) {
   :root { --shell: min(1080px, 100% - 2.5rem); }

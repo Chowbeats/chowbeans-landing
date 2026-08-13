@@ -38,25 +38,77 @@
 
   <section class="widget shell">
 
-    <div class="tabs" role="tablist" aria-label="Community access">
-      <button type="button" role="tab" id="tab-apply"
-              aria-controls="panel-apply" aria-selected="true">Apply</button>
-      <button type="button" role="tab" id="tab-login"
-              aria-controls="panel-login" aria-selected="false" tabindex="-1">Sign in</button>
-    </div>
+    <div class="widget-layout">
 
-    <!-- Apply — SocialLadder application widget (#slWebAppWidget). -->
-    <div class="panel panel--narrow" id="panel-apply" role="tabpanel" aria-labelledby="tab-apply">
-      <div class="widget-loading"><i aria-hidden="true"></i><p class="label">Loading</p></div>
-      <div id="slWebAppWidget"></div>
-    </div>
+      <div class="widget-main">
+        <div class="tabs" role="tablist" aria-label="Community access">
+          <button type="button" role="tab" id="tab-apply"
+                  aria-controls="panel-apply" aria-selected="true">Apply</button>
+          <button type="button" role="tab" id="tab-login"
+                  aria-controls="panel-login" aria-selected="false" tabindex="-1">Sign in</button>
+        </div>
 
-    <!-- Sign in — SocialLadder ambassador dashboard (#slWebFrame). -->
-    <div class="panel" id="panel-login" role="tabpanel" aria-labelledby="tab-login" hidden>
-      <div class="widget-loading"><i aria-hidden="true"></i><p class="label">Loading</p></div>
-      <div id="slWebFrame"></div>
-    </div>
+        <!-- Apply — SocialLadder application widget (#slWebAppWidget). -->
+        <div class="panel panel--narrow" id="panel-apply" role="tabpanel" aria-labelledby="tab-apply">
+          <div class="widget-loading"><i aria-hidden="true"></i><p class="label">Loading</p></div>
+          <div id="slWebAppWidget"></div>
+        </div>
 
+        <!-- Sign in — SocialLadder ambassador dashboard (#slWebFrame). -->
+        <div class="panel" id="panel-login" role="tabpanel" aria-labelledby="tab-login" hidden>
+          <div class="widget-loading"><i aria-hidden="true"></i><p class="label">Loading</p></div>
+          <div id="slWebFrame"></div>
+        </div>
+      </div>
+
+      <!-- Context rail. Driven by postMessage events from the dashboard;
+           static copy while the application widget is open, which emits none. -->
+      <aside class="rail" aria-live="polite">
+        <div class="rail-block">
+          <p class="label">Status</p>
+          <p class="rail-status" id="railStatus">
+            <span class="rail-dot" aria-hidden="true"></span><span id="railStatusText">Not signed in</span>
+          </p>
+        </div>
+
+        <div class="rail-block">
+          <p class="label" id="railContextLabel">Applying</p>
+          <h3 id="railTitle">Three steps</h3>
+          <p id="railBody">
+            Contact details, a few questions about how you drink coffee, then
+            terms. Approval lands by email, usually the same week.
+          </p>
+        </div>
+
+        <div class="rail-block" id="railStepsBlock" hidden>
+          <p class="label">How it works</p>
+          <ol class="rail-steps" id="railSteps"></ol>
+        </div>
+
+        <div class="rail-block" id="railCountsBlock" hidden>
+          <p class="label">Waiting for you</p>
+          <ul class="rail-counts" id="railCounts"></ul>
+        </div>
+
+        <div class="rail-block">
+          <p class="label">Handbook</p>
+          <ul class="rail-links">
+            <li><a href="#">How challenges work</a></li>
+            <li><a href="#">What a bean is worth</a></li>
+            <li><a href="#">Ambassador handbook</a></li>
+            <li><a href="#">Ask the roaster</a></li>
+          </ul>
+        </div>
+
+        <div class="rail-block rail-block--feed">
+          <p class="label">Activity</p>
+          <ul class="rail-feed" id="railFeed">
+            <li class="rail-empty">Nothing yet.</li>
+          </ul>
+        </div>
+      </aside>
+
+    </div>
   </section>
 
 </main>
