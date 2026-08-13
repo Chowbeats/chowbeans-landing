@@ -1,0 +1,130 @@
+/* Apply / Sign in tabs for the two SocialLadder widgets.
+   Each panel mounts on first open — loading both up front would pull in two
+   full portals. Once mounted a panel is only hidden, never torn down, so
+   switching back keeps any session the widget established. */
+(function () {
+  'use strict';
+
+  var cfg = window.SL_CONFIG || {};
+
+  var VIEWS = {
+    apply: {
+      tab: 'tab-apply',
+      panel: 'panel-apply',
+      mount: function () {
+        var appGuid = getParameterFromURLByName('appGuid') || cfg.defaultAppGuid;
+        loadSLApplicationWidget(
+          cfg.areaGuid,
+          appGuid,
+          '',
+          '',
+          getParameterFromURLByName('campGuid'),
+          cfg.crmShopName,
+          getParameterFromURLByName('resGuid')
+        );
+      }
+    },
+    login: {
+      tab: 'tab-login',
+      panel: 'panel-login',
+      mount: function () {
+        loadSLWebFrame(
+          cfg.areaGuid,
+          '',
+          getParameterFromURLByName('campGuid'),
+          getParameterFromURLByName('resGuid'),
+          getParameterFromURLByName('resetToken')
+        );
+      }
+    }
+  };
+
+  var tabs = document.querySelector('.tabs');
+  if (!tabs || typeof loadSLApplicationWidget !== 'function') return;
+
+  var order = ['apply', 'login'];
+  var mounted = {};
+  var current = null;
+
+  /* Hide a panel's placeholder as soon as the widget puts something in it. */
+  function watchPlaceholder(panel, host) {
+    var loading = panel.querySelector('.widget-loading');
+    if (!loading) return;
+
+    var settled = false;
+    var finish = function () {
+      if (settled) return;
+      settled = true;
+      loading.hidden = true;
+    };
+
+    if (host.childElementCount > 0) { finish(); return; }
+
+    if ('MutationObserver' in window) {
+      var mo = new MutationObserver(function () {
+        if (host.childElementCount === 0) return;
+        mo.disconnect();
+        finish();
+      });
+      mo.observe(host, { childList: true });
+    }
+
+    var elapsed = 0;
+    var poll = setInterval(function () {
+      elapsed += 500;
+      if (host.childElementCount > 0) { clearInterval(poll); finish(); return; }
+      if (elapsed >= 15000) {
+        clearInterval(poll);
+        loading.innerHTML = '<p class="label">This could not be loaded</p>';
+      }
+    }, 500);
+  }
+
+  function show(name) {
+    if (name === current) return;
+
+    order.forEach(function (key) {
+      var view = VIEWS[key];
+      var tab = document.getElementById(view.tab);
+      var panel = document.getElementById(view.panel);
+      var on = key === name;
+
+      tab.setAttribute('aria-selected', on ? 'true' : 'false');
+      tab.tabIndex = on ? 0 : -1;
+      panel.hidden = !on;
+    });
+
+    current = name;
+
+    if (!mounted[name]) {
+      mounted[name] = true;
+      var view = VIEWS[name];
+      var panel = document.getElementById(view.panel);
+      var host = panel.querySelector('#slWebAppWidget, #slWebFrame');
+      watchPlaceholder(panel, host);
+      view.mount();
+    }
+  }
+
+  tabs.addEventListener('click', function (event) {
+    var tab = event.target.closest('[role="tab"]');
+    if (!tab) return;
+    show(tab.id === 'tab-login' ? 'login' : 'apply');
+  });
+
+  tabs.addEventListener('keydown', function (event) {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    var next = order[(order.indexOf(current) + 1) % order.length];
+    show(next);
+    document.getElementById(VIEWS[next].tab).focus();
+  });
+
+  /* A reset link, an explicit ?view=login, or a saved session opens sign-in. */
+  var requested = (getParameterFromURLByName('view') || '').toLowerCase();
+  var startOnLogin = requested === 'login' ||
+                     requested === 'signin' ||
+                     !!getParameterFromURLByName('resetToken');
+
+  show(startOnLogin ? 'login' : 'apply');
+})();

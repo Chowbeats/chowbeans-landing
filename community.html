@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Community — Chowbeans</title>
+<meta name="description" content="The Chowbeans ambassador community. Apply to join, or sign in.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='7' fill='%236B4A32'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header" id="header">
+  <div class="shell header-inner">
+    <a class="wordmark" href="index.html"><i aria-hidden="true"></i>Chowbeans</a>
+    <nav class="nav" aria-label="Primary">
+      <a href="index.html#beans">Coffee</a>
+      <a href="community.html" aria-current="page">Community</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="page-hero shell">
+    <p class="label" data-reveal style="--i:0">Ambassadors</p>
+    <h1 data-reveal style="--i:1">Pour for the room.</h1>
+    <p data-reveal style="--i:2">
+      Share your link, bring people to the bar, and collect beans for every
+      cup that starts with you.
+    </p>
+  </section>
+
+  <section class="widget shell">
+
+    <div class="tabs" role="tablist" aria-label="Community access">
+      <button type="button" role="tab" id="tab-apply"
+              aria-controls="panel-apply" aria-selected="true">Apply</button>
+      <button type="button" role="tab" id="tab-login"
+              aria-controls="panel-login" aria-selected="false" tabindex="-1">Sign in</button>
+    </div>
+
+    <!-- Apply — SocialLadder application widget (#slWebAppWidget). -->
+    <div class="panel panel--narrow" id="panel-apply" role="tabpanel" aria-labelledby="tab-apply">
+      <div class="widget-loading"><i aria-hidden="true"></i><p class="label">Loading</p></div>
+      <div id="slWebAppWidget"></div>
+    </div>
+
+    <!-- Sign in — SocialLadder ambassador dashboard (#slWebFrame). -->
+    <div class="panel" id="panel-login" role="tabpanel" aria-labelledby="tab-login" hidden>
+      <div class="widget-loading"><i aria-hidden="true"></i><p class="label">Loading</p></div>
+      <div id="slWebFrame"></div>
+    </div>
+
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="shell footer-inner">
+    <p>4-2-9 Nakameguro, Tokyo &nbsp;&middot;&nbsp; Mon&ndash;Fri 07:00&ndash;18:00</p>
+    <nav class="nav" aria-label="Footer">
+      <a href="index.html#beans">Coffee</a>
+      <a href="community.html">Community</a>
+    </nav>
+    <p>Chowbeans &mdash; a fictional roastery.</p>
+  </div>
+</footer>
+
+<!-- ── SocialLadder ─────────────────────────────────────────────
+     One loader serves both widgets. Each panel is mounted the first
+     time it is opened; campGuid / resGuid / resetToken / appGuid are
+     read from this page's URL by the loader's own helper.
+     ───────────────────────────────────────────────────────────── -->
+<script src="https://socialladder.rkiapps.com/SLWeb/slweb-frame.js"></script>
+<script>
+  var SL_CONFIG = {
+    areaGuid:       "6FADA2AE-122F-4F53-AEBE-B10A0A56F3EA",
+    defaultAppGuid: "910BB1F9-9680-4BC3-8FAC-AFF15D4B0EBD",
+    crmShopName:    "APPLICATIONSHOP1609"
+  };
+</script>
+
+<script src="assets/js/main.js"></script>
+<script src="assets/js/widget.js"></script>
+</body>
+</html>
