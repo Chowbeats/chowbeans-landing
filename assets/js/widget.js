@@ -98,6 +98,7 @@
     section = null;
     setContext(name === 'login' ? LOGIN_COPY : APPLY_COPY);
     setSteps(name === 'login' ? null : 'apply');
+    setTraining(null);
     if (name === 'apply') setStatus('Not signed in', '');
 
     if (!mounted[name]) {
@@ -132,7 +133,12 @@
 
   var SL_ORIGIN = 'https://socialladder.rkiapps.com';
 
+  /* Singular keys are the detail views — the portal routes a specific
+     challenge to 'challenge', not 'challenges'. */
   var SECTIONS = {
+    'challenge': ['Challenge', 'Work through the brief, submit, and the beans land once we verify.'],
+    'reward': ['Reward', 'Confirm to spend your beans. Collect at the bar or on the next roast day.'],
+    'thread': ['Thread', 'Pick up the conversation where the bar left off.'],
     'dashboard': ['Dashboard', 'Beans land here the moment a referral is credited.'],
     'conversion-tracking': ['Refer a friend', 'Your link works anywhere — in store, in a DM, on a bag.'],
     'challenges': ['Challenges', 'Each one pays in beans. New challenges drop with the Tuesday roast.'],
@@ -156,6 +162,11 @@
       'Do the thing — post, refer a friend, or answer the quiz.',
       'Submit. Beans land once we verify, usually within a day.'
     ],
+    'challenge': [
+      'Read the brief and check what it pays.',
+      'Work through the training material before you start.',
+      'Submit once. Answers are final on quiz challenges.'
+    ],
     'conversion-tracking': [
       'Copy your personal link.',
       'Share it anywhere — in store, in a DM, on a bag.',
@@ -165,6 +176,24 @@
       'Check your bean balance at the top.',
       'Pick a reward and confirm.',
       'Collect at the bar, or we ship it on the next roast day.'
+    ]
+  };
+
+  /* Training material shown when a specific challenge is open. Keys are the
+     challenge name lowercased with trailing punctuation stripped; '*' is the
+     fallback for anything not listed. Placeholder hrefs — swap for real ones. */
+  var TRAINING = {
+    'take the quiz': [
+      ['Extraction, in one page', '#'],
+      ['Our twelve origins', '#'],
+      ['How to describe a cup', '#'],
+      ['Quiz rules and scoring', '#']
+    ],
+    '*': [
+      ['Ambassador training: start here', '#'],
+      ['Brand voice and tone', '#'],
+      ['Photo and posting rules', '#'],
+      ['What a bean is worth', '#']
     ]
   };
 
@@ -185,6 +214,8 @@
     counts: document.getElementById('railCounts'),
     stepsBlock: document.getElementById('railStepsBlock'),
     steps: document.getElementById('railSteps'),
+    trainingBlock: document.getElementById('railTrainingBlock'),
+    training: document.getElementById('railTraining'),
     feed: document.getElementById('railFeed')
   };
 
@@ -244,6 +275,26 @@
     });
   }
 
+  function setTraining(name) {
+    if (!rail.trainingBlock) return;
+
+    if (!name) { rail.trainingBlock.hidden = true; return; }
+
+    var key = name.toLowerCase().replace(/[!?.\s]+$/, '');
+    var links = TRAINING[key] || TRAINING['*'];
+
+    rail.training.innerHTML = '';
+    links.forEach(function (link) {
+      var a = document.createElement('a');
+      a.href = link[1];
+      a.textContent = link[0];
+      var li = document.createElement('li');
+      li.appendChild(a);
+      rail.training.appendChild(li);
+    });
+    rail.trainingBlock.hidden = false;
+  }
+
   /* 'community/classic' and 'chat#thread-3' both resolve to their base view. */
   function sectionOf(routerLink) {
     return String(routerLink).split('#')[0].split('/')[0];
@@ -257,6 +308,10 @@
     return leaf.length > 1 && leaf.length < 60 ? leaf : '';
   }
 
+  /* Detail views the portal routes to a singular name — these are the ones
+     whose page title carries the item's own name. */
+  var DETAIL = { challenge: 1, reward: 1, thread: 1 };
+
   function onSection(routerLink, pageTitle) {
     var key = sectionOf(routerLink);
     var known = SECTIONS[key];
@@ -266,19 +321,22 @@
     section = key;
     if (fragment) note('Item: ' + fragment);
 
-    /* Drilling into an item fires this too, with the section unchanged — don't
-       overwrite a specific challenge/reward name with its section heading. */
+    /* Drilling in fires this too — don't overwrite a named item with its
+       section heading. */
     if (!moved && fragment) return;
 
     setSteps(key);
+    if (!DETAIL[key]) setTraining(null);
+
     setContext(known
-      ? ['Viewing', known[0], known[1]]
-      : ['Viewing', pageTitle || key, 'Moving through the portal.']);
+      ? [DETAIL[key] ? known[0] : 'Viewing', known[0], known[1]]
+      : ['Viewing', leafOf(pageTitle) || pageTitle || key, 'Moving through the portal.']);
     if (moved) note((known ? known[0] : key) + ' opened');
   }
 
-  /* A title change without a section change means they drilled into an item —
-     a specific challenge, reward or thread. Name it if the portal named it. */
+  /* The portal sends the item's own name as a page title once the detail view
+     opens ("… - Take the quiz!"). That name is the only handle we get on which
+     challenge it is, so it drives both the heading and the training links. */
   function onTitle(title) {
     var leaf = leafOf(title);
     if (!leaf) return;
@@ -286,10 +344,14 @@
     note('Title: ' + leaf);
 
     var known = SECTIONS[section];
-    if (!known || leaf.toLowerCase() === known[0].toLowerCase()) return;
+    var label = known ? known[0] : 'Viewing';
+    var body = known ? known[1] : 'Moving through the portal.';
 
-    var singular = { challenges: 'Challenge', rewards: 'Reward', threads: 'Thread' };
-    setContext([singular[section] || known[0], leaf, known[1]]);
+    /* An intermediate title equal to the section name isn't an item name. */
+    if (known && leaf.toLowerCase() === known[0].toLowerCase()) return;
+
+    setContext([label, leaf, body]);
+    if (DETAIL[section]) setTraining(leaf);
   }
 
   window.addEventListener('message', function (event) {
