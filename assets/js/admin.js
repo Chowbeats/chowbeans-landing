@@ -9,6 +9,9 @@
   var config = Rail.load();
   var dirty = false;
 
+  /* Which rules are expanded. UI state, deliberately not part of the config. */
+  var open = {};
+
   var $ = function (id) { return document.getElementById(id); };
 
   var BLOCK_LABELS = {
@@ -29,12 +32,51 @@
 
   function touch() {
     dirty = true;
+    renderSummaries();
     renderPreview();
     renderJSON();
   }
 
   function uid() {
     return 'r' + Math.random().toString(36).slice(2, 8);
+  }
+
+  /* Imported configs may have no ids; collapse state is keyed on them. */
+  function ensureIds() {
+    config.rules.forEach(function (rule) {
+      if (!rule.id) rule.id = uid();
+    });
+  }
+
+  function summarize(rule) {
+    var when = rule.when || {};
+    var match = when.match || {};
+    var parts = [(when.views && when.views.length) ? when.views.join(', ') : 'any view'];
+
+    if (match.mode && match.mode !== 'any' && String(match.value || '').length) {
+      parts.push((match.negate ? 'not ' : '') + match.mode + ' "' + match.value + '"');
+    }
+    if (when.auth === 'in') parts.push('signed in');
+    if (when.auth === 'out') parts.push('signed out');
+
+    var count = (rule.blocks || []).length;
+    return parts.join(' · ') + ' — ' + count + (count === 1 ? ' block' : ' blocks');
+  }
+
+  function renderSummaries() {
+    var nodes = document.querySelectorAll('#rules .rule');
+    config.rules.forEach(function (rule, i) {
+      if (!nodes[i]) return;
+      nodes[i].querySelector('[data-field="summary"]').textContent = summarize(rule);
+    });
+  }
+
+  function setFold(root, rule, isOpen) {
+    open[rule.id] = isOpen;
+    root.classList.toggle('rule--collapsed', !isOpen);
+    var button = root.querySelector('[data-act="fold"]');
+    button.textContent = isOpen ? '▾' : '▸';
+    button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
   }
 
   /* ── View checkboxes ─────────────────────────────────────────────── */
@@ -137,10 +179,14 @@
   function renderRules() {
     var host = $('rules');
     host.innerHTML = '';
+    ensureIds();
 
     config.rules.forEach(function (rule, index) {
       var node = $('ruleTemplate').content.cloneNode(true);
       var root = node.querySelector('.rule');
+
+      root.querySelector('[data-field="summary"]').textContent = summarize(rule);
+      setFold(root, rule, !!open[rule.id]);
 
       var enabled = root.querySelector('[data-field="enabled"]');
       enabled.checked = rule.enabled !== false;
@@ -211,6 +257,10 @@
       root.querySelectorAll('[data-act]').forEach(function (button) {
         button.addEventListener('click', function () {
           var act = button.dataset.act;
+          if (act === 'fold') {
+            setFold(root, rule, root.classList.contains('rule--collapsed'));
+            return;
+          }
           if (act === 'up' && index > 0) {
             config.rules.splice(index - 1, 0, config.rules.splice(index, 1)[0]);
           } else if (act === 'down' && index < config.rules.length - 1) {
@@ -284,6 +334,38 @@
   ['pvView', 'pvItem', 'pvAuth'].forEach(function (id) {
     $(id).addEventListener('input', renderPreview);
     $(id).addEventListener('change', renderPreview);
+  });
+
+  $('addRule').addEventListener('click', function () {
+    var rule = {
+      id: uid(),
+      name: 'New rule',
+      enabled: true,
+      stop: false,
+      when: { views: [], auth: 'any', match: { mode: 'any', value: '', negate: false } },
+      blocks: [{ type: 'heading', label: '', text: '' }]
+    };
+
+    config.rules.push(rule);
+    open[rule.id] = true;
+    renderRules();
+    touch();
+
+    var last = document.querySelector('#rules .rule:last-child');
+    if (last) {
+      last.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      last.querySelector('.rule-name').select();
+    }
+  });
+
+  $('collapseAll').addEventListener('click', function () {
+    open = {};
+    renderRules();
+  });
+
+  $('expandAll').addEventListener('click', function () {
+    config.rules.forEach(function (rule) { open[rule.id] = true; });
+    renderRules();
   });
 
   $('save').addEventListener('click', function () {

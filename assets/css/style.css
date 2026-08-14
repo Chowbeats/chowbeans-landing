@@ -587,13 +587,37 @@ a { color: inherit; text-decoration: none; }
 .rule-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: .7rem .9rem;
+  gap: .75rem;
+  padding: .6rem .9rem;
   background: var(--paper-2);
 }
-.rule-toggle { display: flex; align-items: center; gap: .6rem; flex: 1; }
+.rule-toggle { display: flex; align-items: center; gap: .6rem; flex-shrink: 0; }
+
+.rule-fold {
+  padding: .1rem .35rem;
+  border: 0;
+  background: none;
+  color: var(--ink-faint);
+  font: inherit;
+  font-size: .8rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.rule-fold:hover { color: var(--bean); }
+
+.rule-summary {
+  flex: 1;
+  min-width: 0;
+  font-size: .74rem;
+  color: var(--ink-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rule--collapsed .rule-body { display: none; }
+.rule--collapsed { background: var(--paper-2); }
 .rule-name {
+  width: 11rem;
   border: 0 !important;
   background: none !important;
   font-weight: 500;

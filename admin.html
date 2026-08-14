@@ -56,7 +56,11 @@
     <section>
       <div class="admin-bar">
         <p class="label">Rules</p>
-        <button type="button" class="btn btn--small" id="addRule">Add rule</button>
+        <div class="admin-actions">
+          <button type="button" class="btn btn--small btn--ghost" id="collapseAll">Collapse all</button>
+          <button type="button" class="btn btn--small btn--ghost" id="expandAll">Expand all</button>
+          <button type="button" class="btn btn--small" id="addRule">Add rule</button>
+        </div>
       </div>
       <div id="rules"></div>
     </section>
@@ -105,10 +109,12 @@
 <template id="ruleTemplate">
   <article class="rule">
     <header class="rule-head">
+      <button type="button" class="rule-fold" data-act="fold" aria-expanded="true" title="Expand or collapse">▾</button>
       <label class="rule-toggle">
-        <input type="checkbox" data-field="enabled">
+        <input type="checkbox" data-field="enabled" title="Enable or disable this rule">
         <input type="text" class="rule-name" data-field="name" placeholder="Rule name">
       </label>
+      <p class="rule-summary" data-field="summary"></p>
       <div class="rule-tools">
         <button type="button" data-act="up" title="Move up">↑</button>
         <button type="button" data-act="down" title="Move down">↓</button>
