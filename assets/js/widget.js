@@ -42,6 +42,37 @@
     }
   };
 
+  /* ── Phones get pointed at the app ──────────────────────────────────
+     The application form is fine in a mobile browser, so Apply is left
+     alone. The ambassador portal is not, so signing in on a phone offers
+     the store first and only mounts the portal if the visitor insists.
+     Append ?mobile=1 to force this path on a desktop for testing. */
+
+  var STORES = {
+    ios: 'https://apps.apple.com/br/app/community-by-socialladder/id6670606352',
+    android: 'https://play.google.com/store/apps/details?id=com.socialladdergen3'
+  };
+
+  var SEEN = 'chowbeans.webok';
+
+  /* iPadOS reports itself as a Mac, hence the touch-point check. */
+  function iPadish() {
+    return /Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1;
+  }
+
+  function platform() {
+    if (/iPhone|iPad|iPod/i.test(navigator.userAgent) || iPadish()) return 'ios';
+    if (/Android/i.test(navigator.userAgent)) return 'android';
+    return null;
+  }
+
+  function isPhone() {
+    if (/[?&]mobile=1/.test(location.search)) return true;
+    if (platform()) return true;
+    if (/Windows Phone|Mobile/i.test(navigator.userAgent)) return true;
+    return window.matchMedia('(pointer: coarse)').matches && window.innerWidth < 900;
+  }
+
   var tabs = document.querySelector('.tabs');
   if (!tabs || typeof loadSLApplicationWidget !== 'function') return;
 
@@ -85,6 +116,96 @@
     }, 500);
   }
 
+  /* ── App modal ──────────────────────────────────────────────────── */
+
+  var modal = document.getElementById('appModal');
+  var advice = document.getElementById('webAdvice');
+  var lastFocus = null;
+
+  function storeUrl() {
+    return STORES[platform()] || STORES.ios;
+  }
+
+  function setUpStoreLinks() {
+    var os = platform();
+    var primary = document.getElementById('storePrimary');
+    var secondary = document.getElementById('storeSecondary');
+    var adviceLink = document.getElementById('adviceLink');
+
+    if (os) {
+      primary.href = STORES[os];
+      primary.textContent = os === 'ios' ? 'Get it on the App Store' : 'Get it on Google Play';
+    } else {
+      /* Unknown device — offer both rather than guessing. */
+      primary.href = STORES.ios;
+      primary.textContent = 'App Store';
+      secondary.href = STORES.android;
+      secondary.textContent = 'Google Play';
+      secondary.hidden = false;
+    }
+    if (adviceLink) adviceLink.href = storeUrl();
+  }
+
+  function openModal() {
+    lastFocus = document.activeElement;
+    modal.hidden = false;
+    document.body.classList.add('is-locked');
+    document.getElementById('storePrimary').focus();
+  }
+
+  function closeModal() {
+    modal.hidden = true;
+    document.body.classList.remove('is-locked');
+    if (lastFocus) lastFocus.focus();
+  }
+
+  /* Dismissing without choosing returns to Apply — never strand the visitor
+     looking at a panel with nothing in it. */
+  function dismissModal() {
+    closeModal();
+    if (!mounted.login) show('apply');
+  }
+
+  if (modal) {
+    setUpStoreLinks();
+
+    modal.addEventListener('click', function (event) {
+      if (event.target.closest('[data-close]')) dismissModal();
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && !modal.hidden) dismissModal();
+    });
+
+    document.getElementById('stayOnWeb').addEventListener('click', function () {
+      try { sessionStorage.setItem(SEEN, '1'); } catch (e) {}
+      closeModal();
+      if (advice) advice.hidden = false;
+
+      /* The placeholder was hidden while the modal stood in for it. */
+      var loading = document.getElementById(VIEWS.login.panel)
+        .querySelector('.widget-loading');
+      if (loading) loading.hidden = false;
+
+      mount('login');
+    });
+  }
+
+  function accepted() {
+    try { return sessionStorage.getItem(SEEN) === '1'; } catch (e) { return false; }
+  }
+
+  function mount(name) {
+    if (mounted[name]) return;
+    mounted[name] = true;
+
+    var view = VIEWS[name];
+    var panel = document.getElementById(view.panel);
+    var host = panel.querySelector('#slWebAppWidget, #slWebFrame');
+    watchPlaceholder(panel, host);
+    view.mount();
+  }
+
   function show(name) {
     if (name === current) return;
 
@@ -103,14 +224,16 @@
     section = null;
     if (Rail) Rail.setContext({ view: name === 'login' ? 'signin' : 'apply', item: '' });
 
-    if (!mounted[name]) {
-      mounted[name] = true;
-      var view = VIEWS[name];
-      var panel = document.getElementById(view.panel);
-      var host = panel.querySelector('#slWebAppWidget, #slWebFrame');
-      watchPlaceholder(panel, host);
-      view.mount();
+    /* Hold the portal back on a phone until they choose app or web. */
+    if (name === 'login' && modal && isPhone() && !accepted() && !mounted.login) {
+      var panel = document.getElementById(VIEWS.login.panel);
+      var loading = panel.querySelector('.widget-loading');
+      if (loading) loading.hidden = true;
+      openModal();
+      return;
     }
+
+    mount(name);
   }
 
   tabs.addEventListener('click', function (event) {

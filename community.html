@@ -54,8 +54,14 @@
           <div id="slWebAppWidget"></div>
         </div>
 
-        <!-- Sign in — SocialLadder ambassador dashboard (#slWebFrame). -->
+        <!-- Sign in — SocialLadder ambassador dashboard (#slWebFrame).
+             On a phone this is held back until the visitor picks the app or
+             the web; see the modal below. -->
         <div class="panel" id="panel-login" role="tabpanel" aria-labelledby="tab-login" hidden>
+          <p class="widget-advice" id="webAdvice" hidden>
+            You're on the web version. The app is smoother on a phone —
+            <a href="#" id="adviceLink">get it here</a>.
+          </p>
           <div class="widget-loading"><i aria-hidden="true"></i><p class="label">Loading</p></div>
           <div id="slWebFrame"></div>
         </div>
@@ -76,6 +82,34 @@
 
     </div>
   </section>
+
+  <!-- Shown instead of the portal when signing in on a phone. -->
+  <div class="modal" id="appModal" role="dialog" aria-modal="true"
+       aria-labelledby="appModalTitle" aria-describedby="appModalBody" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-card">
+      <button type="button" class="modal-close" data-close aria-label="Close">&times;</button>
+
+      <p class="label">Ambassadors</p>
+      <h2 id="appModalTitle">Better in the app</h2>
+      <p id="appModalBody">
+        On a phone, the community runs best in the Community by SocialLadder
+        app — challenges, rewards and notifications without the browser in
+        the way.
+      </p>
+
+      <div class="modal-actions">
+        <a class="btn" id="storePrimary" href="#" target="_blank" rel="noopener noreferrer">Get the app</a>
+        <a class="btn btn--ghost" id="storeSecondary" href="#" target="_blank" rel="noopener noreferrer" hidden>Other store</a>
+      </div>
+
+      <button type="button" class="modal-plain" id="stayOnWeb">Continue in this browser</button>
+      <p class="modal-fine">
+        The web version works fine, but it is not the best experience on a
+        small screen.
+      </p>
+    </div>
+  </div>
 
 </main>
 
