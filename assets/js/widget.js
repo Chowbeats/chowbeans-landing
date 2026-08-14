@@ -1,4 +1,6 @@
-/* Apply / Sign in tabs for the two SocialLadder widgets.
+/* Apply / Sign in tabs for the two SocialLadder widgets, plus the listener
+   that feeds the rail engine.
+
    Each panel mounts on first open — loading both up front would pull in two
    full portals. Once mounted a panel is only hidden, never torn down, so
    switching back keeps any session the widget established. */
@@ -6,6 +8,7 @@
   'use strict';
 
   var cfg = window.SL_CONFIG || {};
+  var Rail = window.Rail;
 
   var VIEWS = {
     apply: {
@@ -41,6 +44,8 @@
 
   var tabs = document.querySelector('.tabs');
   if (!tabs || typeof loadSLApplicationWidget !== 'function') return;
+
+  if (Rail) Rail.init();
 
   var order = ['apply', 'login'];
   var mounted = {};
@@ -96,10 +101,7 @@
 
     current = name;
     section = null;
-    setContext(name === 'login' ? LOGIN_COPY : APPLY_COPY);
-    setSteps(name === 'login' ? null : 'apply');
-    setTraining(null);
-    if (name === 'apply') setStatus('Not signed in', '');
+    if (Rail) Rail.setContext({ view: name === 'login' ? 'signin' : 'apply', item: '' });
 
     if (!mounted[name]) {
       mounted[name] = true;
@@ -125,236 +127,59 @@
     document.getElementById(VIEWS[next].tab).focus();
   });
 
-  /* ── Context rail ───────────────────────────────────────────────────
+  /* ── Portal bridge ──────────────────────────────────────────────────
      The dashboard posts its state to this window (the same messages the
      loader's own bridge consumes — listeners are additive, so reading them
-     here changes nothing). The application widget posts nothing at all, so
-     that tab gets static copy rather than a fake live readout. */
+     here changes nothing). We translate those into a view + item name and
+     hand them to the rail engine, which decides what to show.
+
+     The application widget posts nothing at all, so the apply tab only ever
+     reports the 'apply' view. */
 
   var SL_ORIGIN = 'https://socialladder.rkiapps.com';
 
-  /* Singular keys are the detail views — the portal routes a specific
-     challenge to 'challenge', not 'challenges'. */
-  var SECTIONS = {
-    'challenge': ['Challenge', 'Work through the brief, submit, and the beans land once we verify.'],
-    'reward': ['Reward', 'Confirm to spend your beans. Collect at the bar or on the next roast day.'],
-    'thread': ['Thread', 'Pick up the conversation where the bar left off.'],
-    'dashboard': ['Dashboard', 'Beans land here the moment a referral is credited.'],
-    'conversion-tracking': ['Refer a friend', 'Your link works anywhere — in store, in a DM, on a bag.'],
-    'challenges': ['Challenges', 'Each one pays in beans. New challenges drop with the Tuesday roast.'],
-    'rewards': ['Rewards', 'Trade beans for bags, gear, or a seat at the next cupping.'],
-    'community': ['Community', 'See who else is pouring. The leaderboard resets monthly.'],
-    'chat': ['Chat', 'Talk to the roaster. We answer between pours.'],
-    'threads': ['Threads', 'Longer conversations with the rest of the bar.'],
-    'notifications': ['Notifications', 'Challenge results, reward approvals and replies.'],
-    'settings': ['Settings', 'Payout details, socials and how we reach you.']
-  };
+  /* Detail views carry the item's own name in the page title. */
+  var DETAIL = { challenge: 1, reward: 1, thread: 1 };
 
-  /* Onboarding shown alongside the sections that need explaining. */
-  var STEPS = {
-    'apply': [
-      'Contact details and how we reach you.',
-      'A few questions about how you drink coffee.',
-      'Agree to terms and submit.'
-    ],
-    'challenges': [
-      'Open a challenge to read the brief and what it pays.',
-      'Do the thing — post, refer a friend, or answer the quiz.',
-      'Submit. Beans land once we verify, usually within a day.'
-    ],
-    'challenge': [
-      'Read the brief and check what it pays.',
-      'Work through the training material before you start.',
-      'Submit once. Answers are final on quiz challenges.'
-    ],
-    'conversion-tracking': [
-      'Copy your personal link.',
-      'Share it anywhere — in store, in a DM, on a bag.',
-      'Every order that starts with your link credits you.'
-    ],
-    'rewards': [
-      'Check your bean balance at the top.',
-      'Pick a reward and confirm.',
-      'Collect at the bar, or we ship it on the next roast day.'
-    ]
-  };
-
-  /* Training material shown when a specific challenge is open. Keys are the
-     challenge name lowercased with trailing punctuation stripped; '*' is the
-     fallback for anything not listed. Placeholder hrefs — swap for real ones. */
-  var TRAINING = {
-    'take the quiz': [
-      ['Extraction, in one page', '#'],
-      ['Our twelve origins', '#'],
-      ['How to describe a cup', '#'],
-      ['Quiz rules and scoring', '#']
-    ],
-    '*': [
-      ['Ambassador training: start here', '#'],
-      ['Brand voice and tone', '#'],
-      ['Photo and posting rules', '#'],
-      ['What a bean is worth', '#']
-    ]
-  };
-
-  var APPLY_COPY = ['Applying', 'Join the bar',
-    'A short form, then we review. Approval lands by email, usually the same week.'];
-
-  var LOGIN_COPY = ['Signing in', 'Your bar',
-    'Sign in to pick up your challenges, beans and standing. This panel follows ' +
-    'along as you move through the portal.'];
-
-  var rail = {
-    statusText: document.getElementById('railStatusText'),
-    status: document.getElementById('railStatus'),
-    label: document.getElementById('railContextLabel'),
-    title: document.getElementById('railTitle'),
-    body: document.getElementById('railBody'),
-    countsBlock: document.getElementById('railCountsBlock'),
-    counts: document.getElementById('railCounts'),
-    stepsBlock: document.getElementById('railStepsBlock'),
-    steps: document.getElementById('railSteps'),
-    trainingBlock: document.getElementById('railTrainingBlock'),
-    training: document.getElementById('railTraining'),
-    feed: document.getElementById('railFeed')
-  };
-
-  var counts = {};
   var section = null;
-
-  function setStatus(text, state) {
-    if (!rail.statusText) return;
-    rail.statusText.textContent = text;
-    rail.status.dataset.state = state || '';
-  }
-
-  function setContext(copy) {
-    if (!rail.title) return;
-    rail.label.textContent = copy[0];
-    rail.title.textContent = copy[1];
-    rail.body.textContent = copy[2];
-  }
-
-  function note(text) {
-    if (!rail.feed) return;
-    var empty = rail.feed.querySelector('.rail-empty');
-    if (empty) empty.remove();
-
-    var time = new Date().toTimeString().slice(0, 8);
-    var li = document.createElement('li');
-    li.innerHTML = '<span>' + time + '</span>';
-    li.appendChild(document.createTextNode(text));
-    rail.feed.prepend(li);
-
-    while (rail.feed.children.length > 6) rail.feed.lastElementChild.remove();
-  }
-
-  function renderCounts() {
-    var keys = Object.keys(counts).filter(function (k) { return counts[k] > 0; });
-    rail.countsBlock.hidden = keys.length === 0;
-    rail.counts.innerHTML = '';
-    keys.forEach(function (k) {
-      var li = document.createElement('li');
-      li.textContent = k;
-      var b = document.createElement('b');
-      b.textContent = counts[k];
-      li.appendChild(b);
-      rail.counts.appendChild(li);
-    });
-  }
-
-  function setSteps(key) {
-    var steps = STEPS[key];
-    rail.stepsBlock.hidden = !steps;
-    if (!steps) return;
-    rail.steps.innerHTML = '';
-    steps.forEach(function (text) {
-      var li = document.createElement('li');
-      li.appendChild(document.createTextNode(text));
-      rail.steps.appendChild(li);
-    });
-  }
-
-  function setTraining(name) {
-    if (!rail.trainingBlock) return;
-
-    if (!name) { rail.trainingBlock.hidden = true; return; }
-
-    var key = name.toLowerCase().replace(/[!?.\s]+$/, '');
-    var links = TRAINING[key] || TRAINING['*'];
-
-    rail.training.innerHTML = '';
-    links.forEach(function (link) {
-      var a = document.createElement('a');
-      a.href = link[1];
-      a.textContent = link[0];
-      var li = document.createElement('li');
-      li.appendChild(a);
-      rail.training.appendChild(li);
-    });
-    rail.trainingBlock.hidden = false;
-  }
 
   /* 'community/classic' and 'chat#thread-3' both resolve to their base view. */
   function sectionOf(routerLink) {
     return String(routerLink).split('#')[0].split('/')[0];
   }
 
-  /* The portal's own title is a breadcrumb joined by ' - ', ' : ' and friends;
-     the last leaf is the specific thing being viewed (a challenge name, say). */
+  /* The portal's title is a breadcrumb joined by ' - ', ' | ' and friends;
+     the last leaf is the specific thing being viewed. */
   function leafOf(title) {
     var parts = String(title).split(/\s[-—:;.|_]\s/);
     var leaf = parts[parts.length - 1].trim();
     return leaf.length > 1 && leaf.length < 60 ? leaf : '';
   }
 
-  /* Detail views the portal routes to a singular name — these are the ones
-     whose page title carries the item's own name. */
-  var DETAIL = { challenge: 1, reward: 1, thread: 1 };
-
-  function onSection(routerLink, pageTitle) {
+  function onSection(routerLink) {
     var key = sectionOf(routerLink);
-    var known = SECTIONS[key];
     var fragment = String(routerLink).split('#')[1];
     var moved = key !== section;
 
-    section = key;
-    if (fragment) note('Item: ' + fragment);
+    if (fragment) Rail.note('item: ' + fragment);
 
-    /* Drilling in fires this too — don't overwrite a named item with its
-       section heading. */
+    /* Drilling in fires this too — don't wipe a named item with its section. */
     if (!moved && fragment) return;
 
-    setSteps(key);
-    if (!DETAIL[key]) setTraining(null);
-
-    setContext(known
-      ? [DETAIL[key] ? known[0] : 'Viewing', known[0], known[1]]
-      : ['Viewing', leafOf(pageTitle) || pageTitle || key, 'Moving through the portal.']);
-    if (moved) note((known ? known[0] : key) + ' opened');
+    section = key;
+    Rail.setContext({ view: key, item: '' });
+    if (moved) Rail.note('view: ' + key);
   }
 
-  /* The portal sends the item's own name as a page title once the detail view
-     opens ("… - Take the quiz!"). That name is the only handle we get on which
-     challenge it is, so it drives both the heading and the training links. */
   function onTitle(title) {
     var leaf = leafOf(title);
     if (!leaf) return;
 
-    note('Title: ' + leaf);
-
-    var known = SECTIONS[section];
-    var label = known ? known[0] : 'Viewing';
-    var body = known ? known[1] : 'Moving through the portal.';
-
-    /* An intermediate title equal to the section name isn't an item name. */
-    if (known && leaf.toLowerCase() === known[0].toLowerCase()) return;
-
-    setContext([label, leaf, body]);
-    if (DETAIL[section]) setTraining(leaf);
+    Rail.note('title: ' + leaf);
+    if (DETAIL[section]) Rail.setContext({ item: leaf });
   }
 
-  window.addEventListener('message', function (event) {
+  if (Rail) window.addEventListener('message', function (event) {
     if (event.origin !== SL_ORIGIN) return;
 
     var msg = event.data;
@@ -362,40 +187,24 @@
 
     switch (msg.action) {
       case 'communityAuthenticated':
-        setStatus('Signed in', 'on');
-        note('Signed in');
+        Rail.setAuth(true);
+        Rail.note('signed in');
         break;
       case 'communityAuthRequired':
-        setStatus('Sign-in required', 'warn');
-        note('Sign-in required');
-        break;
-      case 'loaded':
-        if (current === 'login') setStatus('Portal ready', 'on');
-        note('Portal loaded');
+        Rail.setAuth(false);
+        Rail.note('sign-in required');
         break;
       case 'activeRouterLink':
         if (typeof msg.routerLink === 'string') onSection(msg.routerLink);
         break;
       case 'updateBrowserHistory':
-        if (typeof msg.routerLink === 'string') onSection(msg.routerLink, msg.pageTitle);
+        if (typeof msg.routerLink === 'string') onSection(msg.routerLink);
         break;
       case 'updatePageTitle':
         if (typeof msg.title === 'string') onTitle(msg.title);
         break;
-      case 'newNotifications':
-        counts['Notifications'] = msg.count; renderCounts();
-        break;
-      case 'newChatNotifications':
-        counts['Chat'] = msg.count; renderCounts();
-        break;
-      case 'newCommunityNotifications':
-        counts['Community'] = msg.count; renderCounts();
-        break;
-      case 'testMode':
-        setStatus('Test mode', 'warn');
-        break;
-      case 'dialogOpened':
-        note('Dialog opened');
+      case 'loaded':
+        Rail.note('portal loaded');
         break;
     }
   }, false);

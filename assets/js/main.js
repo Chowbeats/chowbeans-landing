@@ -12,6 +12,20 @@
     window.addEventListener('scroll', onScroll, { passive: true });
   }
 
+  /* Easter egg: five clicks on the wordmark dot opens the rail rule editor.
+     No password — this is a mockup, and the page is unlisted, not secret. */
+  var dot = document.querySelector('.wordmark i');
+  if (dot) {
+    var hits = 0;
+    var reset;
+    dot.addEventListener('click', function (event) {
+      event.preventDefault();
+      clearTimeout(reset);
+      reset = setTimeout(function () { hits = 0; }, 1200);
+      if (++hits >= 5) window.location.href = 'admin.html';
+    });
+  }
+
   /* Staggered reveals. Elements start hidden only if JS runs, so
      no-JS visitors still see everything. */
   var targets = document.querySelectorAll('[data-reveal]');

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Rail rules — Chowbeans</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='7' fill='%236B4A32'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="admin">
+
+<header class="site-header">
+  <div class="shell header-inner">
+    <a class="wordmark" href="index.html"><i aria-hidden="true"></i>Chowbeans</a>
+    <nav class="nav" aria-label="Primary">
+      <a href="community.html">Community</a>
+      <a href="community.html?debug=1">Community + events</a>
+    </nav>
+  </div>
+</header>
+
+<main class="shell admin-main">
+
+  <div class="admin-head">
+    <div>
+      <p class="label">Admin</p>
+      <h1 class="h2">Rail rules</h1>
+      <p class="admin-lede">
+        Rules decide what shows beside the widget. Each one is matched against
+        what the visitor is doing in the portal, top to bottom — every match
+        adds its blocks, unless a rule says stop. Saved to this browser only;
+        export to keep them.
+      </p>
+    </div>
+    <div class="admin-actions">
+      <button type="button" class="btn" id="save">Save</button>
+      <button type="button" class="btn btn--ghost" id="revert">Revert</button>
+      <button type="button" class="btn btn--ghost" id="defaults">Load defaults</button>
+    </div>
+  </div>
+
+  <p class="admin-flash" id="flash" hidden></p>
+
+  <section class="admin-panel">
+    <p class="label">Show the rail only on these views</p>
+    <p class="admin-hint">Nothing ticked means every view. A view with no matching rule shows no rail at all.</p>
+    <div class="admin-views" id="onlyOn"></div>
+  </section>
+
+  <div class="admin-grid">
+
+    <section>
+      <div class="admin-bar">
+        <p class="label">Rules</p>
+        <button type="button" class="btn btn--small" id="addRule">Add rule</button>
+      </div>
+      <div id="rules"></div>
+    </section>
+
+    <aside class="admin-side">
+      <div class="admin-panel">
+        <p class="label">Preview</p>
+        <p class="admin-hint">Pretend the visitor is here, and see what renders.</p>
+
+        <label class="admin-field">
+          <span>View</span>
+          <select id="pvView"></select>
+        </label>
+        <label class="admin-field">
+          <span>Item name</span>
+          <input type="text" id="pvItem" placeholder="Take the quiz!">
+        </label>
+        <label class="admin-field admin-field--row">
+          <input type="checkbox" id="pvAuth" checked>
+          <span>Signed in</span>
+        </label>
+
+        <div class="admin-preview">
+          <div class="rail" id="preview"></div>
+        </div>
+        <p class="admin-hint" id="pvMatched"></p>
+      </div>
+
+      <div class="admin-panel">
+        <p class="label">Export / import</p>
+        <p class="admin-hint">
+          Paste this into <code>DEFAULTS</code> in <code>assets/js/rail.js</code>
+          to ship it to everyone, or import someone else's here.
+        </p>
+        <textarea id="json" spellcheck="false" rows="10"></textarea>
+        <div class="admin-actions">
+          <button type="button" class="btn btn--small" id="copy">Copy</button>
+          <button type="button" class="btn btn--small btn--ghost" id="apply">Apply pasted</button>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+</main>
+
+<template id="ruleTemplate">
+  <article class="rule">
+    <header class="rule-head">
+      <label class="rule-toggle">
+        <input type="checkbox" data-field="enabled">
+        <input type="text" class="rule-name" data-field="name" placeholder="Rule name">
+      </label>
+      <div class="rule-tools">
+        <button type="button" data-act="up" title="Move up">↑</button>
+        <button type="button" data-act="down" title="Move down">↓</button>
+        <button type="button" data-act="dup" title="Duplicate">Duplicate</button>
+        <button type="button" data-act="del" title="Delete">Delete</button>
+      </div>
+    </header>
+
+    <div class="rule-body">
+      <p class="label">When</p>
+      <div class="rule-when">
+        <label class="admin-field">
+          <span>Views (none = any)</span>
+          <div class="admin-views" data-field="views"></div>
+        </label>
+        <div class="rule-when-row">
+          <label class="admin-field">
+            <span>Item name</span>
+            <select data-field="matchMode">
+              <option value="any">any</option>
+              <option value="contains">contains</option>
+              <option value="equals">is exactly</option>
+              <option value="starts">starts with</option>
+              <option value="regex">matches regex</option>
+            </select>
+          </label>
+          <label class="admin-field admin-field--row rule-negate">
+            <input type="checkbox" data-field="negate">
+            <span>not</span>
+          </label>
+          <label class="admin-field admin-field--grow">
+            <span>&nbsp;</span>
+            <input type="text" data-field="matchValue" placeholder="quiz">
+          </label>
+          <label class="admin-field">
+            <span>Visitor</span>
+            <select data-field="auth">
+              <option value="any">any</option>
+              <option value="in">signed in</option>
+              <option value="out">signed out</option>
+            </select>
+          </label>
+        </div>
+        <label class="admin-field admin-field--row">
+          <input type="checkbox" data-field="stop">
+          <span>Stop — skip every rule below this one when it matches</span>
+        </label>
+      </div>
+
+      <div class="admin-bar">
+        <p class="label">Then show</p>
+        <div class="rule-add">
+          <button type="button" data-add="heading">+ Heading</button>
+          <button type="button" data-add="text">+ Text</button>
+          <button type="button" data-add="note">+ Callout</button>
+          <button type="button" data-add="steps">+ Steps</button>
+          <button type="button" data-add="links">+ Links</button>
+        </div>
+      </div>
+      <div class="rule-blocks" data-field="blocks"></div>
+    </div>
+  </article>
+</template>
+
+<script src="assets/js/rail.js"></script>
+<script src="assets/js/admin.js"></script>
+</body>
+</html>

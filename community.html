@@ -61,55 +61,16 @@
         </div>
       </div>
 
-      <!-- Context rail. Driven by postMessage events from the dashboard;
-           static copy while the application widget is open, which emits none. -->
-      <aside class="rail" aria-live="polite">
-        <div class="rail-block">
-          <p class="label">Status</p>
-          <p class="rail-status" id="railStatus">
-            <span class="rail-dot" aria-hidden="true"></span><span id="railStatusText">Not signed in</span>
-          </p>
-        </div>
+      <!-- Context rail. Every block is rendered from the rules in
+           assets/js/rail.js, matched against what the visitor is doing in
+           the portal. Edit the rules in admin.html. -->
+      <aside class="rail" id="rail" aria-live="polite" hidden>
+        <div id="railBlocks"></div>
 
-        <div class="rail-block">
-          <p class="label" id="railContextLabel">Applying</p>
-          <h3 id="railTitle">Three steps</h3>
-          <p id="railBody">
-            Contact details, a few questions about how you drink coffee, then
-            terms. Approval lands by email, usually the same week.
-          </p>
-        </div>
-
-        <div class="rail-block" id="railStepsBlock" hidden>
-          <p class="label">How it works</p>
-          <ol class="rail-steps" id="railSteps"></ol>
-        </div>
-
-        <div class="rail-block rail-block--accent" id="railTrainingBlock" hidden>
-          <p class="label">Training material</p>
-          <ul class="rail-links" id="railTraining"></ul>
-        </div>
-
-        <div class="rail-block" id="railCountsBlock" hidden>
-          <p class="label">Waiting for you</p>
-          <ul class="rail-counts" id="railCounts"></ul>
-        </div>
-
-        <div class="rail-block">
-          <p class="label">Handbook</p>
-          <ul class="rail-links">
-            <li><a href="#">How challenges work</a></li>
-            <li><a href="#">What a bean is worth</a></li>
-            <li><a href="#">Ambassador handbook</a></li>
-            <li><a href="#">Ask the roaster</a></li>
-          </ul>
-        </div>
-
-        <div class="rail-block rail-block--feed">
-          <p class="label">Activity</p>
-          <ul class="rail-feed" id="railFeed">
-            <li class="rail-empty">Nothing yet.</li>
-          </ul>
+        <!-- Only with ?debug — the raw event stream, for writing rules. -->
+        <div class="rail-block rail-block--feed" id="railDebug" hidden>
+          <p class="label">Events</p>
+          <ul class="rail-feed" id="railFeed"></ul>
         </div>
       </aside>
 
@@ -144,6 +105,7 @@
 </script>
 
 <script src="assets/js/main.js"></script>
+<script src="assets/js/rail.js"></script>
 <script src="assets/js/widget.js"></script>
 </body>
 </html>
