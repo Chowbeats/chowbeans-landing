@@ -484,12 +484,5 @@ a { color: inherit; text-decoration: none; }
 
   .community { flex-direction: column; align-items: flex-start; }
 
-  /* Give the embedded portal the full viewport width. Our page gutters cost it
-     ~40px, which is enough to wrap its seven-item nav onto a second row.
-     Negative gutters rather than 100vw, which counts the scrollbar and
-     overflows. --shell leaves 1.25rem each side at this breakpoint. */
-  .widget-main { margin-inline: -1.25rem; }
-  .widget-main .tabs { margin-inline: auto; }
-
-  .panel { min-height: 600px; }
+  .panel { min-height: 980px; }
 }
