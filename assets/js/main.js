@@ -14,15 +14,18 @@
 
   /* Easter egg: five clicks on the wordmark dot opens the rail rule editor.
      No password — this is a mockup, and the page is unlisted, not secret. */
-  var dot = document.querySelector('.wordmark i');
+  var wordmark = document.querySelector('.wordmark');
+  var dot = wordmark && wordmark.querySelector('i');
   if (dot) {
     var hits = 0;
     var reset;
+    /* Pages in a subdirectory declare their own path to the editor. */
+    var adminUrl = wordmark.dataset.admin || 'admin.html';
     dot.addEventListener('click', function (event) {
       event.preventDefault();
       clearTimeout(reset);
       reset = setTimeout(function () { hits = 0; }, 1200);
-      if (++hits >= 5) window.location.href = 'admin.html';
+      if (++hits >= 5) window.location.href = adminUrl;
     });
   }
 

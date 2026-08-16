@@ -190,6 +190,33 @@ a { color: inherit; text-decoration: none; }
 .beans .notes { color: var(--ink-soft); }
 .beans .price { color: var(--ink-faint); font-variant-numeric: tabular-nums; }
 
+/* Program details — plain columns and hairline rows. */
+.cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 1.75rem 2rem;
+  margin-top: 1.5rem;
+}
+.cols h3 { font-size: .95rem; font-weight: 500; margin-bottom: .35rem; }
+.cols p { color: var(--ink-soft); max-width: 34ch; }
+
+.rows { margin-top: .25rem; }
+.rows li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-block: .8rem;
+  border-bottom: 1px solid var(--line);
+}
+.rows .value {
+  color: var(--ink-faint);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.section-head--tight { margin-top: 2.75rem; }
+
 /* ── Community ────────────────────────────────────────── */
 
 /* The reason the site exists — held to the content column, high on the page. */
@@ -213,6 +240,11 @@ a { color: inherit; text-decoration: none; }
 }
 .community .btn { background: var(--paper); color: var(--ink); }
 .community .btn:hover { background: var(--paper-2); }
+.community p .link {
+  margin-left: .35rem;
+  font-size: .84rem;
+  font-weight: 400;
+}
 .community .link {
   color: var(--paper);
   border-color: rgba(250, 248, 244, .45);
