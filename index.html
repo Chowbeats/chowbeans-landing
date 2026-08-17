@@ -13,14 +13,18 @@
 </head>
 <body>
 
-<a class="skip" href="#main">Skip to content</a>
+<a class="skip" href="#main" data-i18n="skip">Skip to content</a>
 
 <header class="site-header" id="header">
   <div class="shell header-inner">
     <a class="wordmark" href="index.html"><i aria-hidden="true"></i>Chowbeans</a>
     <nav class="nav" aria-label="Primary">
-      <a href="#beans">Coffee</a>
-      <a href="community.html">Community</a>
+      <a href="#beans" data-i18n="nav.coffee">Coffee</a>
+      <a href="community.html" data-i18n="nav.community">Community</a>
+      <span class="lang" role="group" aria-label="Language">
+        <button type="button" data-lang="en" aria-pressed="true">EN</button>
+        <button type="button" data-lang="es" aria-pressed="false">ES</button>
+      </span>
     </nav>
   </div>
 </header>
@@ -28,8 +32,8 @@
 <main id="main">
 
   <section class="hero shell">
-    <h1 data-reveal style="--i:0">Coffee, reduced to <span>what matters.</span></h1>
-    <p data-reveal style="--i:1">
+    <h1 data-reveal style="--i:0" data-i18n-html="home.title">Coffee, reduced to <span>what matters.</span></h1>
+    <p data-reveal style="--i:1" data-i18n="home.lede">
       Twelve farms. One roaster. Small lots, roasted light and served
       within nine days of the drop.
     </p>
@@ -38,31 +42,31 @@
   <section class="shell">
     <div class="community" data-reveal>
       <div>
-        <p class="label">Ambassadors</p>
-        <h2 class="h2">The people who pour for us</h2>
+        <p class="label" data-i18n="home.amb.label">Ambassadors</p>
+        <h2 class="h2" data-i18n="home.amb.title">The people who pour for us</h2>
         <p>
-          Share the drop, bring people to the bar, earn beans and first
-          access to every micro-lot.
-          <a class="link" href="community/program-details.html">Program details</a>
+          <span data-i18n="home.amb.body">Share the drop, bring people to the bar, earn beans and first
+          access to every micro-lot.</span>
+          <a class="link" href="community/program-details.html" data-i18n="home.amb.details">Program details</a>
         </p>
       </div>
       <p class="community-actions">
-        <a class="btn" href="community.html">Apply</a>
-        <a class="link" href="community.html?view=login">Sign in</a>
+        <a class="btn" href="community.html" data-i18n="btn.apply">Apply</a>
+        <a class="link" href="community.html?view=login" data-i18n="btn.signin">Sign in</a>
       </p>
     </div>
   </section>
 
   <section class="section shell" id="beans">
     <div class="section-head" data-reveal>
-      <h2 class="h2">This week</h2>
-      <p class="label">Three lots</p>
+      <h2 class="h2" data-i18n="home.week.title">This week</h2>
+      <p class="label" data-i18n="home.week.label">Three lots</p>
     </div>
     <ul class="beans">
       <li data-reveal style="--i:0; --roast:#D9B48F">
         <span class="dot" aria-hidden="true"></span>
         <h3>Guji Uraga</h3>
-        <p class="notes">Bergamot, white peach, jasmine</p>
+        <p class="notes" data-i18n="bean.1.notes">Bergamot, white peach, jasmine</p>
         <ul class="tags" aria-label="Suggested methods">
           <li class="tag--pour">V60</li><li class="tag--pour">Chemex</li>
         </ul>
@@ -71,7 +75,7 @@
       <li data-reveal style="--i:1; --roast:#B5794C">
         <span class="dot" aria-hidden="true"></span>
         <h3>Huila Reserva</h3>
-        <p class="notes">Red apple, panela, soft cocoa</p>
+        <p class="notes" data-i18n="bean.2.notes">Red apple, panela, soft cocoa</p>
         <ul class="tags" aria-label="Suggested methods">
           <li class="tag--immersion">Aeropress</li><li class="tag--pour">Filter</li>
         </ul>
@@ -80,7 +84,7 @@
       <li data-reveal style="--i:2; --roast:#6B4A32">
         <span class="dot" aria-hidden="true"></span>
         <h3>Cerrado N&ordm; 4</h3>
-        <p class="notes">Brazil nut, dark caramel, round</p>
+        <p class="notes" data-i18n="bean.3.notes">Brazil nut, dark caramel, round</p>
         <ul class="tags" aria-label="Suggested methods">
           <li class="tag--pressure">Espresso</li><li class="tag--pressure">Moka</li>
         </ul>
@@ -93,15 +97,16 @@
 
 <footer class="site-footer">
   <div class="shell footer-inner">
-    <p>4-2-9 Nakameguro, Tokyo &nbsp;&middot;&nbsp; Mon&ndash;Fri 07:00&ndash;18:00</p>
+    <p data-i18n="footer.hours">4-2-9 Nakameguro, Tokyo &nbsp;&middot;&nbsp; Mon&ndash;Fri 07:00&ndash;18:00</p>
     <nav class="nav" aria-label="Footer">
-      <a href="#beans">Coffee</a>
-      <a href="community.html">Community</a>
+      <a href="#beans" data-i18n="nav.coffee">Coffee</a>
+      <a href="community.html" data-i18n="nav.community">Community</a>
     </nav>
-    <p>Chowbeans &mdash; a fictional roastery.</p>
+    <p data-i18n="footer.fine">Chowbeans &mdash; a fictional roastery.</p>
   </div>
 </footer>
 
+<script src="assets/js/i18n.js"></script>
 <script src="assets/js/main.js"></script>
 </body>
 </html>

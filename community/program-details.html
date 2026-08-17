@@ -13,14 +13,18 @@
 </head>
 <body>
 
-<a class="skip" href="#main">Skip to content</a>
+<a class="skip" href="#main" data-i18n="skip">Skip to content</a>
 
 <header class="site-header" id="header">
   <div class="shell header-inner">
     <a class="wordmark" href="../index.html" data-admin="../admin.html"><i aria-hidden="true"></i>Chowbeans</a>
     <nav class="nav" aria-label="Primary">
-      <a href="../index.html#beans">Coffee</a>
-      <a href="../community.html">Community</a>
+      <a href="../index.html#beans" data-i18n="nav.coffee">Coffee</a>
+      <a href="../community.html" data-i18n="nav.community">Community</a>
+      <span class="lang" role="group" aria-label="Language">
+        <button type="button" data-lang="en" aria-pressed="true">EN</button>
+        <button type="button" data-lang="es" aria-pressed="false">ES</button>
+      </span>
     </nav>
   </div>
 </header>
@@ -28,9 +32,9 @@
 <main id="main">
 
   <section class="page-hero shell">
-    <p class="label" data-reveal style="--i:0">Ambassador program</p>
-    <h1 data-reveal style="--i:1">Pour for the room.</h1>
-    <p data-reveal style="--i:2">
+    <p class="label" data-reveal style="--i:0" data-i18n="pd.label">Ambassador program</p>
+    <h1 data-reveal style="--i:1" data-i18n="comm.title">Pour for the room.</h1>
+    <p data-reveal style="--i:2" data-i18n="pd.lede">
       Chowbeans grows by word of mouth and nothing else. Ambassadors share the
       drop, bring people to the bar, and earn beans for every cup that starts
       with them. Here is exactly how it works.
@@ -39,103 +43,103 @@
 
   <section class="section shell">
     <div class="section-head" data-reveal>
-      <h2 class="h2">What you get</h2>
-      <p class="label">Four things</p>
+      <h2 class="h2" data-i18n="pd.get.title">What you get</h2>
+      <p class="label" data-i18n="pd.get.label">Four things</p>
     </div>
     <div class="cols">
       <div data-reveal style="--i:0">
-        <h3>Beans on every referral</h3>
-        <p>Anyone who orders through your link earns you beans. They keep earning after the first order.</p>
+        <h3 data-i18n="pd.get.1.h">Beans on every referral</h3>
+        <p data-i18n="pd.get.1.p">Anyone who orders through your link earns you beans. They keep earning after the first order.</p>
       </div>
       <div data-reveal style="--i:1">
-        <h3>First access to micro-lots</h3>
-        <p>Small lots sell out in a morning. Ambassadors see them a day before the list goes public.</p>
+        <h3 data-i18n="pd.get.2.h">First access to micro-lots</h3>
+        <p data-i18n="pd.get.2.p">Small lots sell out in a morning. Ambassadors see them a day before the list goes public.</p>
       </div>
       <div data-reveal style="--i:2">
-        <h3>A seat at the cupping</h3>
-        <p>We cup the new arrivals on Saturdays. Seats are limited and yours to claim with beans.</p>
+        <h3 data-i18n="pd.get.3.h">A seat at the cupping</h3>
+        <p data-i18n="pd.get.3.p">We cup the new arrivals on Saturdays. Seats are limited and yours to claim with beans.</p>
       </div>
       <div data-reveal style="--i:3">
-        <h3>Gear from the shelf</h3>
-        <p>Grinders, drippers, scales. The same equipment we use behind the bar, not branded merchandise.</p>
+        <h3 data-i18n="pd.get.4.h">Gear from the shelf</h3>
+        <p data-i18n="pd.get.4.p">Grinders, drippers, scales. The same equipment we use behind the bar, not branded merchandise.</p>
       </div>
     </div>
   </section>
 
   <section class="section shell">
     <div class="section-head" data-reveal>
-      <h2 class="h2">How beans work</h2>
-      <p class="label">Earn</p>
+      <h2 class="h2" data-i18n="pd.beans.title">How beans work</h2>
+      <p class="label" data-i18n="pd.earn">Earn</p>
     </div>
     <ul class="rows" data-reveal>
-      <li><span>A friend orders with your link</span><span class="value">50 beans</span></li>
-      <li><span>You bring someone to the bar</span><span class="value">30 beans</span></li>
-      <li><span>You post a brew and tag us</span><span class="value">20 beans</span></li>
-      <li><span>You finish a challenge quiz</span><span class="value">20 beans</span></li>
+      <li><span data-i18n="pd.earn.1">A friend orders with your link</span><span class="value" data-i18n="pd.beans.50">50 beans</span></li>
+      <li><span data-i18n="pd.earn.2">You bring someone to the bar</span><span class="value" data-i18n="pd.beans.30">30 beans</span></li>
+      <li><span data-i18n="pd.earn.3">You post a brew and tag us</span><span class="value" data-i18n="pd.beans.20">20 beans</span></li>
+      <li><span data-i18n="pd.earn.4">You finish a challenge quiz</span><span class="value" data-i18n="pd.beans.20">20 beans</span></li>
     </ul>
 
     <div class="section-head section-head--tight" data-reveal>
-      <h2 class="h2">Spend</h2>
+      <h2 class="h2" data-i18n="pd.spend">Spend</h2>
     </div>
     <ul class="rows" data-reveal>
-      <li><span>A bag from the current drop</span><span class="value">250 beans</span></li>
-      <li><span>A seat at a Saturday cupping</span><span class="value">400 beans</span></li>
-      <li><span>A hand grinder from the shelf</span><span class="value">900 beans</span></li>
+      <li><span data-i18n="pd.spend.1">A bag from the current drop</span><span class="value" data-i18n="pd.beans.250">250 beans</span></li>
+      <li><span data-i18n="pd.spend.2">A seat at a Saturday cupping</span><span class="value" data-i18n="pd.beans.400">400 beans</span></li>
+      <li><span data-i18n="pd.spend.3">A hand grinder from the shelf</span><span class="value" data-i18n="pd.beans.900">900 beans</span></li>
     </ul>
   </section>
 
   <section class="section shell">
     <div class="section-head" data-reveal>
-      <h2 class="h2">Who it is for</h2>
-      <p class="label">Eligibility</p>
+      <h2 class="h2" data-i18n="pd.who.title">Who it is for</h2>
+      <p class="label" data-i18n="pd.who.label">Eligibility</p>
     </div>
     <div class="cols">
       <div data-reveal style="--i:0">
-        <h3>No follower count</h3>
-        <p>We have never once looked at one. Bringing four people who stay beats four thousand who scroll past.</p>
+        <h3 data-i18n="pd.who.1.h">No follower count</h3>
+        <p data-i18n="pd.who.1.p">We have never once looked at one. Bringing four people who stay beats four thousand who scroll past.</p>
       </div>
       <div data-reveal style="--i:1">
-        <h3>Anywhere we ship</h3>
-        <p>If we can get a bag to you, you can be an ambassador. The bar is in Tokyo, the program is not.</p>
+        <h3 data-i18n="pd.who.2.h">Anywhere we ship</h3>
+        <p data-i18n="pd.who.2.p">If we can get a bag to you, you can be an ambassador. The bar is in Tokyo, the program is not.</p>
       </div>
       <div data-reveal style="--i:2">
-        <h3>Eighteen or older</h3>
-        <p>You need to be eighteen to hold an account and to claim anything from it.</p>
+        <h3 data-i18n="pd.who.3.h">Eighteen or older</h3>
+        <p data-i18n="pd.who.3.p">You need to be eighteen to hold an account and to claim anything from it.</p>
       </div>
     </div>
   </section>
 
   <section class="section shell">
     <div class="section-head" data-reveal>
-      <h2 class="h2">House rules</h2>
-      <p class="label">Short version</p>
+      <h2 class="h2" data-i18n="pd.rules.title">House rules</h2>
+      <p class="label" data-i18n="pd.rules.label">Short version</p>
     </div>
     <ul class="rows" data-reveal>
-      <li><span>One account per person.</span></li>
-      <li><span>Only recommend what you have actually tasted.</span></li>
-      <li><span>No paid advertising against the Chowbeans name.</span></li>
-      <li><span>Beans expire twelve months after you earn them.</span></li>
-      <li><span>We close accounts that game the program. It has happened twice.</span></li>
+      <li><span data-i18n="pd.rules.1">One account per person.</span></li>
+      <li><span data-i18n="pd.rules.2">Only recommend what you have actually tasted.</span></li>
+      <li><span data-i18n="pd.rules.3">No paid advertising against the Chowbeans name.</span></li>
+      <li><span data-i18n="pd.rules.4">Beans expire twelve months after you earn them.</span></li>
+      <li><span data-i18n="pd.rules.5">We close accounts that game the program. It has happened twice.</span></li>
     </ul>
   </section>
 
   <section class="section shell">
     <div class="section-head" data-reveal>
-      <h2 class="h2">Getting in</h2>
-      <p class="label">Three steps</p>
+      <h2 class="h2" data-i18n="pd.join.title">Getting in</h2>
+      <p class="label" data-i18n="pd.join.label">Three steps</p>
     </div>
     <div class="cols">
       <div data-reveal style="--i:0">
-        <h3>Apply</h3>
-        <p>A short form. Contact details, a few questions about how you drink coffee.</p>
+        <h3 data-i18n="pd.join.1.h">Apply</h3>
+        <p data-i18n="pd.join.1.p">A short form. Contact details, a few questions about how you drink coffee.</p>
       </div>
       <div data-reveal style="--i:1">
-        <h3>Hear back within a week</h3>
-        <p>A person reads every application. We roast on Tuesdays and review on Wednesdays.</p>
+        <h3 data-i18n="pd.join.2.h">Hear back within a week</h3>
+        <p data-i18n="pd.join.2.p">A person reads every application. We roast on Tuesdays and review on Wednesdays.</p>
       </div>
       <div data-reveal style="--i:2">
-        <h3>Get your link</h3>
-        <p>Issued the day you are approved, along with your first challenges.</p>
+        <h3 data-i18n="pd.join.3.h">Get your link</h3>
+        <p data-i18n="pd.join.3.p">Issued the day you are approved, along with your first challenges.</p>
       </div>
     </div>
   </section>
@@ -143,16 +147,16 @@
   <section class="shell">
     <div class="community" data-reveal>
       <div>
-        <p class="label">Ready</p>
-        <h2 class="h2">Join the bar</h2>
-        <p>
+        <p class="label" data-i18n="pd.cta.label">Ready</p>
+        <h2 class="h2" data-i18n="pd.cta.title">Join the bar</h2>
+        <p data-i18n="pd.cta.body">
           Applications take about a minute. If you are already an ambassador,
           sign in to pick up your challenges and beans.
         </p>
       </div>
       <p class="community-actions">
-        <a class="btn" href="../community.html">Apply</a>
-        <a class="link" href="../community.html?view=login">Sign in</a>
+        <a class="btn" href="../community.html" data-i18n="btn.apply">Apply</a>
+        <a class="link" href="../community.html?view=login" data-i18n="btn.signin">Sign in</a>
       </p>
     </div>
   </section>
@@ -161,16 +165,17 @@
 
 <footer class="site-footer">
   <div class="shell footer-inner">
-    <p>4-2-9 Nakameguro, Tokyo &nbsp;&middot;&nbsp; Mon&ndash;Fri 07:00&ndash;18:00</p>
+    <p data-i18n="footer.hours">4-2-9 Nakameguro, Tokyo &nbsp;&middot;&nbsp; Mon&ndash;Fri 07:00&ndash;18:00</p>
     <nav class="nav" aria-label="Footer">
-      <a href="../index.html#beans">Coffee</a>
-      <a href="../community.html">Community</a>
-      <a href="program-details.html">Program</a>
+      <a href="../index.html#beans" data-i18n="nav.coffee">Coffee</a>
+      <a href="../community.html" data-i18n="nav.community">Community</a>
+      <a href="program-details.html" data-i18n="nav.program">Program</a>
     </nav>
-    <p>Chowbeans, a fictional roastery.</p>
+    <p data-i18n="footer.fine">Chowbeans, a fictional roastery.</p>
   </div>
 </footer>
 
+<script src="../assets/js/i18n.js"></script>
 <script src="../assets/js/main.js"></script>
 </body>
 </html>

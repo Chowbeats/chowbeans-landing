@@ -10,6 +10,17 @@
   var cfg = window.SL_CONFIG || {};
   var Rail = window.Rail;
 
+  /* The loader forwards this into the widget URL, so the portal comes up in
+     the same language as the page. */
+  function slLang() {
+    var lang = (window.I18N && window.I18N.lang) || 'en';
+    return (cfg.langCodes && cfg.langCodes[lang]) || lang;
+  }
+
+  function t(key, fallback) {
+    return (window.I18N && window.I18N.t(key)) || fallback;
+  }
+
   var VIEWS = {
     apply: {
       tab: 'tab-apply',
@@ -23,7 +34,8 @@
           '',
           getParameterFromURLByName('campGuid'),
           cfg.crmShopName,
-          getParameterFromURLByName('resGuid')
+          getParameterFromURLByName('resGuid'),
+          slLang()
         );
       }
     },
@@ -36,7 +48,8 @@
           '',
           getParameterFromURLByName('campGuid'),
           getParameterFromURLByName('resGuid'),
-          getParameterFromURLByName('resetToken')
+          getParameterFromURLByName('resetToken'),
+          slLang()
         );
       }
     }
@@ -134,13 +147,15 @@
 
     if (os) {
       primary.href = STORES[os];
-      primary.textContent = os === 'ios' ? 'Get it on the App Store' : 'Get it on Google Play';
+      primary.textContent = os === 'ios'
+        ? t('modal.ios', 'Get it on the App Store')
+        : t('modal.android', 'Get it on Google Play');
     } else {
       /* Unknown device — offer both rather than guessing. */
       primary.href = STORES.ios;
-      primary.textContent = 'App Store';
+      primary.textContent = t('modal.ios.short', 'App Store');
       secondary.href = STORES.android;
-      secondary.textContent = 'Google Play';
+      secondary.textContent = t('modal.android.short', 'Google Play');
       secondary.hidden = false;
     }
     if (adviceLink) adviceLink.href = storeUrl();

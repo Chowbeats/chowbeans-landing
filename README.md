@@ -78,6 +78,45 @@ everyone, copy the JSON from the export box into `DEFAULTS` in
 names and page titles as they arrive. That is how to discover what to write a
 rule against.
 
+## English and Spanish
+
+English lives in the markup. `assets/js/i18n.js` holds the Spanish and swaps
+it in. Elements opt in with `data-i18n="key"`, or `data-i18n-html` for the one
+or two strings that carry markup.
+
+Language is resolved in this order: **`?lang=` → localStorage → English**, so
+campaign links work on a first visit and the choice sticks afterwards. The
+`EN / ES` toggle sits in the header of every public page.
+
+### Links for an email campaign
+
+```
+https://chowbeats.github.io/chowbeans-landing/community.html?lang=en
+https://chowbeats.github.io/chowbeans-landing/community.html?lang=es
+```
+
+Combine with anything else, e.g. `?lang=es&view=login` to land a Spanish
+speaker straight on the sign-in tab.
+
+### The widget follows the page
+
+`lang` is passed through to both SocialLadder loaders, so the portal comes up
+in the same language. The codes are set in `SL_CONFIG.langCodes` in
+`community.html` — confirm with SocialLadder which values your area accepts,
+since the loader only forwards them (it may want `es-ES` or `es-MX`).
+
+Switching language with a widget already mounted reloads the page, because a
+mounted iframe cannot be re-languaged in place.
+
+### Adding a string
+
+Wrap it in `data-i18n="some.key"`, then add `'some.key': 'texto'` to the `ES`
+object. Anything without a Spanish entry falls back to the English in the
+markup, so a missing translation degrades quietly rather than showing a key.
+
+Two things are deliberately not translated: `admin.html`, which is an internal
+tool, and the rail rules, which are content you author in the editor.
+
 ## Run locally
 
 ```sh
