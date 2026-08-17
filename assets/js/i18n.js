@@ -129,6 +129,7 @@
 
   /* English is whatever the markup shipped with. */
   var original = new Map();
+  var originalAttrs = new Map();
 
   function read(name) {
     try { return localStorage.getItem(name); } catch (e) { return null; }
@@ -148,6 +149,27 @@
 
   var lang = requested();
 
+  /* Persist whatever we resolved, not just explicit toggle clicks. Arriving
+     on ?lang=es and then following an internal link must stay Spanish. */
+  write(KEY, lang);
+
+  /* Belt and braces for when storage is unavailable (private windows, blocked
+     cookies): carry the language on same-origin links so the URL alone is
+     enough. Also keeps shared URLs truthful. */
+  function decorate() {
+    document.querySelectorAll('a[href]').forEach(function (link) {
+      var href = link.getAttribute('href');
+      if (!href || href.charAt(0) === '#' || /^(mailto|tel):/i.test(href)) return;
+
+      var url;
+      try { url = new URL(href, location.href); } catch (e) { return; }
+      if (url.origin !== location.origin) return;
+
+      url.searchParams.set('lang', lang);
+      link.setAttribute('href', url.pathname + url.search + url.hash);
+    });
+  }
+
   function apply() {
     var table = DICT[lang] || {};
 
@@ -166,19 +188,23 @@
       else node.textContent = value || fallback;
     });
 
-    /* Attributes: data-i18n-attr="aria-label:modal.close" */
+    /* Attributes: data-i18n-attr="aria-label:modal.close". Originals are kept
+       in a Map — a dataset key cannot hold the attribute name. */
     document.querySelectorAll('[data-i18n-attr]').forEach(function (node) {
+      var memo = originalAttrs.get(node) || {};
+
       node.getAttribute('data-i18n-attr').split(',').forEach(function (pair) {
         var bits = pair.split(':');
+        if (bits.length < 2) return;
+
         var attr = bits[0].trim();
         var key = bits[1].trim();
-        var memo = 'i18n:' + attr;
 
-        if (!original.has(node.getAttributeNode(attr) || node)) {
-          if (!node.dataset[memo]) node.dataset[memo] = node.getAttribute(attr) || '';
-        }
-        node.setAttribute(attr, (table[key] || node.dataset[memo] || ''));
+        if (!(attr in memo)) memo[attr] = node.getAttribute(attr) || '';
+        node.setAttribute(attr, table[key] || memo[attr]);
       });
+
+      originalAttrs.set(node, memo);
     });
 
     document.documentElement.lang = lang;
@@ -186,6 +212,8 @@
     document.querySelectorAll('[data-lang]').forEach(function (button) {
       button.setAttribute('aria-pressed', button.dataset.lang === lang ? 'true' : 'false');
     });
+
+    decorate();
   }
 
   /* A mounted SocialLadder widget cannot be re-languaged in place, so reload
