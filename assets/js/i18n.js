@@ -61,6 +61,17 @@
     'modal.fine': 'La versión web funciona, pero no es la mejor experiencia en una pantalla pequeña.',
     'modal.close': 'Cerrar',
 
+    /* Application complete */
+    'done.label': 'Postulación recibida',
+    'done.title': 'Estás en la lista.',
+    'done.body': 'Una persona lee cada postulación. Tostamos los martes y revisamos los miércoles, así que espera un correo dentro de la semana.',
+    'done.handoff': 'Te estamos devolviendo a la app.',
+    'done.next.label': 'Siguiente',
+    'done.next.title': 'De vuelta a donde empezaste',
+    'done.next.body': 'Cuando te aprobemos, tu enlace y tus primeros retos llegan por correo.',
+    'done.return': 'Volver a la app',
+    'done.browse': 'Ver los cafés',
+
     /* Program details */
     'pd.label': 'Programa de embajadores',
     'pd.doc.title': 'Detalles del programa. Embajadores de Chowbeans',
