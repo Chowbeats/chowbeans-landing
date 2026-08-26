@@ -21,40 +21,6 @@
     return (window.I18N && window.I18N.t(key)) || fallback;
   }
 
-  var VIEWS = {
-    apply: {
-      tab: 'tab-apply',
-      panel: 'panel-apply',
-      mount: function () {
-        var appGuid = getParameterFromURLByName('appGuid') || cfg.defaultAppGuid;
-        loadSLApplicationWidget(
-          cfg.areaGuid,
-          appGuid,
-          '',
-          '',
-          getParameterFromURLByName('campGuid'),
-          cfg.crmShopName,
-          getParameterFromURLByName('resGuid'),
-          slLang()
-        );
-      }
-    },
-    login: {
-      tab: 'tab-login',
-      panel: 'panel-login',
-      mount: function () {
-        loadSLWebFrame(
-          cfg.areaGuid,
-          '',
-          getParameterFromURLByName('campGuid'),
-          getParameterFromURLByName('resGuid'),
-          getParameterFromURLByName('resetToken'),
-          slLang()
-        );
-      }
-    }
-  };
-
   /* ── Phones get pointed at the app ──────────────────────────────────
      The application form is fine in a mobile browser, so Apply is left
      alone. The ambassador portal is not, so signing in on a phone offers
@@ -86,14 +52,28 @@
     return window.matchMedia('(pointer: coarse)').matches && window.innerWidth < 900;
   }
 
-  var tabs = document.querySelector('.tabs');
-  if (!tabs || typeof loadSLApplicationWidget !== 'function') return;
+  var panel = document.getElementById('panel-login');
+  if (!panel || typeof loadSLWebFrame !== 'function') return;
 
   if (Rail) Rail.init();
 
-  var order = ['apply', 'login'];
-  var mounted = {};
-  var current = null;
+  var mounted = false;
+
+  function mount() {
+    if (mounted) return;
+    mounted = true;
+
+    watchPlaceholder(panel, document.getElementById('slWebFrame'));
+
+    loadSLWebFrame(
+      cfg.areaGuid,
+      '',
+      getParameterFromURLByName('campGuid'),
+      getParameterFromURLByName('resGuid'),
+      getParameterFromURLByName('resetToken'),
+      slLang()
+    );
+  }
 
   /* Hide a panel's placeholder as soon as the widget puts something in it. */
   function watchPlaceholder(panel, host) {
@@ -133,6 +113,7 @@
 
   var modal = document.getElementById('appModal');
   var advice = document.getElementById('webAdvice');
+  var prompt = document.getElementById('appPrompt');
   var lastFocus = null;
 
   function storeUrl() {
@@ -174,11 +155,11 @@
     if (lastFocus) lastFocus.focus();
   }
 
-  /* Dismissing without choosing returns to Apply — never strand the visitor
-     looking at a panel with nothing in it. */
+  /* Dismissing without choosing leaves a way back in, rather than stranding
+     the visitor looking at an empty panel. */
   function dismissModal() {
     closeModal();
-    if (!mounted.login) show('apply');
+    if (!mounted && prompt) prompt.hidden = false;
   }
 
   if (modal) {
@@ -196,74 +177,25 @@
       try { sessionStorage.setItem(SEEN, '1'); } catch (e) {}
       closeModal();
       if (advice) advice.hidden = false;
+      if (prompt) prompt.hidden = true;
 
       /* The placeholder was hidden while the modal stood in for it. */
-      var loading = document.getElementById(VIEWS.login.panel)
-        .querySelector('.widget-loading');
+      var loading = panel.querySelector('.widget-loading');
       if (loading) loading.hidden = false;
 
-      mount('login');
+      mount();
+    });
+
+    var reopen = document.getElementById('showAppOptions');
+    if (reopen) reopen.addEventListener('click', function (event) {
+      event.preventDefault();
+      openModal();
     });
   }
 
   function accepted() {
     try { return sessionStorage.getItem(SEEN) === '1'; } catch (e) { return false; }
   }
-
-  function mount(name) {
-    if (mounted[name]) return;
-    mounted[name] = true;
-
-    var view = VIEWS[name];
-    var panel = document.getElementById(view.panel);
-    var host = panel.querySelector('#slWebAppWidget, #slWebFrame');
-    watchPlaceholder(panel, host);
-    view.mount();
-  }
-
-  function show(name) {
-    if (name === current) return;
-
-    order.forEach(function (key) {
-      var view = VIEWS[key];
-      var tab = document.getElementById(view.tab);
-      var panel = document.getElementById(view.panel);
-      var on = key === name;
-
-      tab.setAttribute('aria-selected', on ? 'true' : 'false');
-      tab.tabIndex = on ? 0 : -1;
-      panel.hidden = !on;
-    });
-
-    current = name;
-    section = null;
-    if (Rail) Rail.setContext({ view: name === 'login' ? 'signin' : 'apply', item: '' });
-
-    /* Hold the portal back on a phone until they choose app or web. */
-    if (name === 'login' && modal && isPhone() && !accepted() && !mounted.login) {
-      var panel = document.getElementById(VIEWS.login.panel);
-      var loading = panel.querySelector('.widget-loading');
-      if (loading) loading.hidden = true;
-      openModal();
-      return;
-    }
-
-    mount(name);
-  }
-
-  tabs.addEventListener('click', function (event) {
-    var tab = event.target.closest('[role="tab"]');
-    if (!tab) return;
-    show(tab.id === 'tab-login' ? 'login' : 'apply');
-  });
-
-  tabs.addEventListener('keydown', function (event) {
-    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
-    event.preventDefault();
-    var next = order[(order.indexOf(current) + 1) % order.length];
-    show(next);
-    document.getElementById(VIEWS[next].tab).focus();
-  });
 
   /* ── Portal bridge ──────────────────────────────────────────────────
      The dashboard posts its state to this window (the same messages the
@@ -347,11 +279,14 @@
     }
   }, false);
 
-  /* A reset link, an explicit ?view=login, or a saved session opens sign-in. */
-  var requested = (getParameterFromURLByName('view') || '').toLowerCase();
-  var startOnLogin = requested === 'login' ||
-                     requested === 'signin' ||
-                     !!getParameterFromURLByName('resetToken');
+  if (Rail) Rail.setContext({ view: 'signin', item: '' });
 
-  show(startOnLogin ? 'login' : 'apply');
+  /* Hold the portal back on a phone until they choose app or web. */
+  if (modal && isPhone() && !accepted()) {
+    var loading = panel.querySelector('.widget-loading');
+    if (loading) loading.hidden = true;
+    openModal();
+  } else {
+    mount();
+  }
 })();

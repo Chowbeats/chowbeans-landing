@@ -45,30 +45,27 @@
     <div class="widget-layout">
 
       <div class="widget-main">
-        <div class="tabs" role="tablist" aria-label="Community access">
-          <button type="button" role="tab" id="tab-apply"
-                  aria-controls="panel-apply" aria-selected="true" data-i18n="btn.apply">Apply</button>
-          <button type="button" role="tab" id="tab-login"
-                  aria-controls="panel-login" aria-selected="false" tabindex="-1" data-i18n="btn.signin">Sign in</button>
-        </div>
-
-        <!-- Apply — SocialLadder application widget (#slWebAppWidget). -->
-        <div class="panel panel--narrow" id="panel-apply" role="tabpanel" aria-labelledby="tab-apply">
-          <div class="widget-loading"><i aria-hidden="true"></i><p class="label" data-i18n="comm.loading">Loading</p></div>
-          <div id="slWebAppWidget"></div>
-        </div>
-
-        <!-- Sign in — SocialLadder ambassador dashboard (#slWebFrame).
-             On a phone this is held back until the visitor picks the app or
-             the web; see the modal below. -->
-        <div class="panel" id="panel-login" role="tabpanel" aria-labelledby="tab-login" hidden>
+        <!-- SocialLadder ambassador dashboard (#slWebFrame). On a phone this
+             is held back until the visitor picks the app or the web; see the
+             modal below. -->
+        <div class="panel" id="panel-login">
           <p class="widget-advice" id="webAdvice" hidden>
             <span data-i18n="comm.advice">You're on the web version. The app is smoother on a phone,</span>
             <a href="#" id="adviceLink" data-i18n="comm.advice.link">get it here</a>.
           </p>
+          <p class="widget-advice" id="appPrompt" hidden>
+            <span data-i18n="comm.blocked">Signing in works best in the app.</span>
+            <a href="#" id="showAppOptions" data-i18n="comm.blocked.link">See your options</a>
+          </p>
           <div class="widget-loading"><i aria-hidden="true"></i><p class="label" data-i18n="comm.loading">Loading</p></div>
           <div id="slWebFrame"></div>
         </div>
+
+        <nav class="widget-links" aria-label="Ambassador documents">
+          <a href="community/terms.html" data-i18n="comm.terms">Terms and conditions</a>
+          <a href="community/dos-and-donts.html" data-i18n="comm.dos">Do's and don'ts</a>
+          <a href="community/program-details.html" data-i18n="home.amb.details">Program details</a>
+        </nav>
       </div>
 
       <!-- Context rail. Every block is rendered from the rules in
